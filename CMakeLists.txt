@@ -5,6 +5,7 @@ include_directories(src)
 
 add_executable(AlphaDeepChess 
 src/main.cpp
+src/uci.cpp
 )
 
 target_compile_options(AlphaDeepChess PRIVATE -g -Wall)
