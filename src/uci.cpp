@@ -9,12 +9,17 @@
 #include <string>
 #include <sstream>
 
+constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 void Uci::loop()
 {
     std::string command;
     std::string line;
 
     bool exit = false;
+
+    board.loadFen(StartFEN);
+    
     do
     {
         std::getline(std::cin, line);
@@ -100,6 +105,7 @@ void Uci::isReadyCommandAction()
 
 void Uci::newgameCommandAction()
 {
+    std::cout << "Not implemented yet!" << std::endl;
 }
 
 /*
@@ -107,6 +113,7 @@ void Uci::newgameCommandAction()
 */
 void Uci::goCommandAction()
 {
+    std::cout << "Not implemented yet!" << std::endl;
 }
 
 /*
@@ -114,10 +121,12 @@ void Uci::goCommandAction()
 */
 void Uci::stopCommandAction()
 {
+    std::cout << "Not implemented yet!" << std::endl;
 }
 
 void Uci::evalCommandAction()
 {
+    std::cout << "Not implemented yet!" << std::endl;
 }
 
 /*
@@ -126,6 +135,7 @@ void Uci::evalCommandAction()
 */
 void Uci::positionCommandAction()
 {
+    std::cout << "Not implemented yet!" << std::endl;
 }
 
 /*
@@ -134,40 +144,40 @@ void Uci::positionCommandAction()
 */
 void Uci::diagramCommandAction()
 {
+    std::cout << board.toString() << std::endl;
 }
 
 void Uci::helpCommandAction()
 {
-    std::cout <<
-        "Commands:\n"
-        "----------------------------------------\n"
-        "uci\n"
-        "\tTell engine to use the UCI (Universal Chess Interface).\n"
-        "\tThe engine must respond with 'uciok'.\n\n"
-        
-        "isready\n"
-        "\tSynchronize the engine with the GUI. The engine must respond with 'readyok'.\n\n"
-        
-        "ucinewgame\n"
-        "\tStart of a new game.\n\n"
-        
-        "position [fen <fenstring> | startpos ] moves <move1> .... <movei>\n"
-        "\tSet up the position on the internal board.\n\n"
-        
-        "go\n"
-        "\tStart calculating.\n"
-        "\tOptional parameters: searchmoves, ponder, wtime, btime, winc, binc, movestogo, depth, nodes, mate, movetime, infinite.\n\n"
-        
-        "stop\n"
-        "\tStop calculating.\n\n"
-        
-        "quit\n"
-        "\tQuit the program.\n\n"
-        
-        "d\n"
-        "\tDisplay the current position on the board.\n\n"
-        
-        << std::endl;
+    std::cout << "Commands:\n"
+                 "----------------------------------------\n"
+                 "uci\n"
+                 "\tTell engine to use the UCI (Universal Chess Interface).\n"
+                 "\tThe engine must respond with 'uciok'.\n\n"
+
+                 "isready\n"
+                 "\tSynchronize the engine with the GUI. The engine must respond with 'readyok'.\n\n"
+
+                 "ucinewgame\n"
+                 "\tStart of a new game.\n\n"
+
+                 "position [fen <fenstring> | startpos ] moves <move1> .... <movei>\n"
+                 "\tSet up the position on the internal board.\n\n"
+
+                 "go\n"
+                 "\tStart calculating.\n"
+                 "\tOptional parameters: searchmoves, ponder, wtime, btime, winc, binc, movestogo, depth, nodes, mate, movetime, infinite.\n\n"
+
+                 "stop\n"
+                 "\tStop calculating.\n\n"
+
+                 "quit\n"
+                 "\tQuit the program.\n\n"
+
+                 "d\n"
+                 "\tDisplay the current position on the board.\n\n"
+
+              << std::endl;
 }
 
 /*
@@ -175,6 +185,7 @@ void Uci::helpCommandAction()
 */
 void Uci::quitCommandAction()
 {
+    std::cout << "goodbye" << std::endl;
 }
 
 void Uci::unknownCommandAction()

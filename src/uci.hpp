@@ -5,6 +5,8 @@
     https://gist.github.com/DOBRO/2592c6dad754ba67e6dcaec8c90165bf#file-uci-protocol-specification-txt
 */
 
+#include <board.hpp>
+
 
 
 class Uci
@@ -17,6 +19,9 @@ public:
     void loop();
 
 private:
+
+    Board board;
+    
     void uciCommandAction();
     void isReadyCommandAction();
     void newgameCommandAction();
