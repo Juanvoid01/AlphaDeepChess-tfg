@@ -29,9 +29,13 @@ public:
 
     constexpr Move(Square from, Square to, MoveType type = MoveType::NORMAL, PieceType promotionPiece = PieceType::KNIGHT)
         : data((from.value() << 6) | to.value() |
-               (static_cast<uint16_t>(promotionPiece) << 12) |
+               ((static_cast<uint16_t>(promotionPiece) - 1) << 12) |
                (static_cast<uint16_t>(type) << 14))
     {
+        /*
+            we substract -1 because PieceType enum values have an offset of 1
+            E.g Knight = 0 and PieceType::KNIGHT = 1
+        */
     }
 
     constexpr inline Square squareFrom() const
@@ -66,8 +70,11 @@ public:
                 01 = BISHOP
                 10 = ROOK
                 11 = QUEEN
+
+            we add +1 because PieceType enum values have an offset of 1
+            E.g Knight = 0 and PieceType::KNIGHT = 1
         */
-        return static_cast<PieceType>((data & 0b0011'0000'0000'0000) >> 12);
+        return static_cast<PieceType>(((data & 0b0011'0000'0000'0000) >> 12) + 1);
     }
 
     // move is not null and is not none

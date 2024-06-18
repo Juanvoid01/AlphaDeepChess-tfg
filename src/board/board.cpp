@@ -260,6 +260,8 @@ void Board::makeMove(Move move)
 
     if (moveType == MoveType::NORMAL)
     {
+        putPiece(getPiece(move.squareFrom()), move.squareTo());
+        deletePiece(move.squareFrom());
     }
     else if (moveType == MoveType::CASTLING)
     {
@@ -267,9 +269,13 @@ void Board::makeMove(Move move)
     }
     else if (moveType == MoveType::EN_PASSANT)
     {
+        makeEnPassant(move);
     }
     else if (moveType == MoveType::PROMOTION)
     {
+        Piece promotionPiece = createPieceByTypeAndColor(move.promotionPiece(), getPieceColor(move.squareFrom()));
+        putPiece(promotionPiece, move.squareTo());
+        deletePiece(move.squareFrom());
     }
 }
 
@@ -306,6 +312,19 @@ void Board::makeCastle(Move move)
         putPiece(Piece::BRook, SQ_D8);
     }
 }
+
 void Board::makeEnPassant(Move move)
 {
+    deletePiece(move.squareFrom());
+
+    if (move.squareTo().row() == ROW_3)
+    {
+        putPiece(Piece::BPawn, move.squareTo());
+        deletePiece(move.squareTo() + Dir::UP);
+    }
+    else if (move.squareTo().row() == ROW_6)
+    {
+        putPiece(Piece::WPawn, move.squareTo());
+        deletePiece(move.squareTo() + Dir::DOWN);
+    }
 }
