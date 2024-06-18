@@ -1,22 +1,34 @@
+#pragma once
+
 #include <cstdint>
 
-#define ROW_1 0
-#define ROW_2 1
-#define ROW_3 2
-#define ROW_4 3
-#define ROW_5 4
-#define ROW_6 5
-#define ROW_7 6
-#define ROW_8 7
+/*
+ * Enum representing all rows on a chess board from ROW_1 to ROW_8
+ */
+enum Row : uint8_t {
+    ROW_1 = 0,
+    ROW_2,
+    ROW_3,
+    ROW_4,
+    ROW_5,
+    ROW_6,
+    ROW_7,
+    ROW_8
+};
 
-#define COL_A 0
-#define COL_B 1
-#define COL_C 2
-#define COL_D 3
-#define COL_E 4
-#define COL_F 5
-#define COL_G 6
-#define COL_H 7
+/*
+ * Enum representing all columns on a chess board from COL_A to COL_H
+ */
+enum Column : uint8_t {
+    COL_A = 0,
+    COL_B,
+    COL_C,
+    COL_D,
+    COL_E,
+    COL_F,
+    COL_G,
+    COL_H
+};
 
 /*
     WPawn = 0,
@@ -33,6 +45,18 @@
     BKing = 11,
     Empty = 12
 */
+
+enum class PieceType
+{
+    KNIGHT = 0,
+    BISHOP = 1,
+    ROOK = 2,
+    QUEEN = 3,
+    KING = 5,
+    PAWN = 0,
+    EMPTY = 6
+};
+
 enum class Piece
 {
     WPawn = 0,
@@ -50,6 +74,11 @@ enum class Piece
     Empty = 12
 };
 
+constexpr inline int index(Piece piece)
+{
+    return static_cast<int>(piece);
+}
+
 /*
  *   White = 0
  *   Black = 1
@@ -60,72 +89,12 @@ enum class Color
     BLACK = 1
 };
 
-/*
- *   Represents an square on the board
- *   int row
- *   int col
- */
-struct Square
-{
-
-    int row;
-    int col;
-
-    Square(int row = -1, int col = -1)
-        : row(row), col(col)
-    {
-    }
-
-    /*
-     * Setter for row and col
-     */
-    inline void set(int Row, int Col)
-    {
-        row = Row;
-        col = Col;
-    }
-
-    /*
-     * Returns true if 0 <= row < 8 && 0 <= col < 8;
-     */
-    inline bool isValid() const
-    {
-        return row >= ROW_1 && row <= ROW_8 && col >= COL_A && col <= COL_H;
-    }
-
-    /*
-     *   Put row = -1 and col = -1
-     */
-    inline void setInvalid()
-    {
-        row = -1;
-        col = -1;
-    }
-
-    /*
-     *   Return the 64 bit mask, all zeros except 1 in the (row * 8 + col) bit;
-     */
-    inline uint64_t mask() const
-    {
-        return 1UL << ((row << 3) + col);
-    }
-
-    /*
-     *   Return string representation. E.g : e4, d6, h1, e8
-     */
-    inline std::string toString() const
-    {
-        return std::string(1, 'a' + col) + static_cast<char>('1' + row);
-    }
-};
-
 static constexpr char pieceRepresentation[13] = {'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k', ' '};
 
- 
 /*
-*   Returns char piece representation
-*   {'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k', ' '}
-*/
+ *   Returns char piece representation
+ *   {'P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k', ' '}
+ */
 constexpr inline char pieceToChar(Piece piece)
 {
     return pieceRepresentation[static_cast<int>(piece)];

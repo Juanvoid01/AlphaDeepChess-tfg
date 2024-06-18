@@ -1,20 +1,18 @@
 #include "board.hpp"
 
 #include <sstream>
+#include <stdexcept>
 
 std::string Board::toString() const
 {
     std::ostringstream diagram;
     diagram << "\n +---+---+---+---+---+---+---+---+\n";
 
-    Square square;
-
     for (int row = ROW_8; row >= ROW_1; --row)
     {
         for (int col = COL_A; col <= COL_H; ++col)
         {
-            square.set(row, col);
-            diagram << " | " << squareToChar(square);
+            diagram << " | " << squareToChar({row, col});
         }
         diagram << " | " << row + 1 << "\n +---+---+---+---+---+---+---+---+\n";
     }
@@ -37,6 +35,8 @@ void Board::loadFen(const std::string &fen)
         https://www.chess.com/terms/fen-chess
         https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
     */
+
+    clearPosition();
 
     int row = ROW_8, col = COL_A;
     char token;
@@ -92,16 +92,18 @@ void Board::loadFen(const std::string &fen)
             // black queen castle
             castleQBlack = true;
         }
-
-        checkAndModifyCastleRights();
     }
+
+    checkAndModifyCastleRights();
 
     // 4. En passant square.
 
-    if ((ss >> col) && (ss >> row))
+    ss >> std::skipws >> token;
+    if (token != '-')
     {
-        row = row - '1';
-        col = col - 'a';
+        col = token - 'a';
+        ss >> token;
+        row = token - '1';
 
         enPassantSquare = Square(row, col);
         checkAndModifyEnPassantRule();
@@ -164,44 +166,6 @@ std::string Board::fen() const
 }
 
 /*
- *   Returns the piece in the square, if square is not valid returns empty
- */
-Piece Board::getPiece(Square square) const
-{
-    uint64_t mask = square.mask();
-
-    if (!square.isValid() || (AllPieces & mask) == 0)
-        return Piece::Empty;
-
-    if (BPawns & mask)
-        return Piece::BPawn;
-    if (BKnights & mask)
-        return Piece::BKnight;
-    if (BBishops & mask)
-        return Piece::BBishop;
-    if (BRooks & mask)
-        return Piece::BRook;
-    if (BQueens & mask)
-        return Piece::BQueen;
-    if (BKing & mask)
-        return Piece::BKing;
-    if (WPawns & mask)
-        return Piece::WPawn;
-    if (WKnights & mask)
-        return Piece::WKnight;
-    if (WBishops & mask)
-        return Piece::WBishop;
-    if (WRooks & mask)
-        return Piece::WRook;
-    if (WQueens & mask)
-        return Piece::WQueen;
-    if (WKing & mask)
-        return Piece::WKing;
-
-    return Piece::Empty;
-}
-
-/*
  *  Used in set fen to check if castle is really avaliable
  *  put castle rights to false if they are not avaliable
  */
@@ -211,32 +175,29 @@ void Board::checkAndModifyCastleRights()
     // Check for white king-side castling rights
     if (castleKWhite)
     {
+
         castleKWhite = getPiece({ROW_1, COL_E}) == Piece::WKing &&
-                       getPiece({ROW_1, COL_H}) == Piece::WRook &&
-                       empty({ROW_1, COL_F}) && empty({ROW_1, COL_G});
+                       getPiece({ROW_1, COL_H}) == Piece::WRook;
     }
     // Check for white queen-side castling rights
     if (castleQWhite)
     {
         castleQWhite = getPiece({ROW_1, COL_E}) == Piece::WKing &&
-                       getPiece({ROW_1, COL_A}) == Piece::WRook &&
-                       empty({ROW_1, COL_B}) && empty({ROW_1, COL_C}) && empty({ROW_1, COL_D});
+                       getPiece({ROW_1, COL_A}) == Piece::WRook;
     }
 
     // Check for black king-side castling rights
     if (castleKBlack)
     {
         castleKBlack = getPiece({ROW_8, COL_E}) == Piece::BKing &&
-                       getPiece({ROW_8, COL_H}) == Piece::BRook &&
-                       empty({ROW_8, COL_F}) && empty({ROW_8, COL_G});
+                       getPiece({ROW_8, COL_H}) == Piece::BRook;
     }
 
     // Check for black queen-side castling rights
     if (castleQBlack)
     {
         castleQBlack = getPiece({ROW_8, COL_E}) == Piece::BKing &&
-                       getPiece({ROW_8, COL_A}) == Piece::BRook &&
-                       empty({ROW_8, COL_B}) && empty({ROW_8, COL_C}) && empty({ROW_8, COL_D});
+                       getPiece({ROW_8, COL_A}) == Piece::BRook;
     }
 }
 
@@ -256,8 +217,8 @@ void Board::checkAndModifyEnPassantRule()
     if (enPassantSquare.isValid())
     {
 
-        int col = enPassantSquare.col;
-        if (enPassantSquare.row == ROW_6)
+        int col = enPassantSquare.col();
+        if (enPassantSquare.row() == ROW_6)
         {
 
             if ((getPiece({ROW_5, col - 1}) == Piece::WPawn || getPiece({ROW_5, col + 1}) == Piece::WPawn) &&
@@ -267,7 +228,7 @@ void Board::checkAndModifyEnPassantRule()
                 valid = true;
             }
         }
-        else if (enPassantSquare.row == ROW_3)
+        else if (enPassantSquare.row() == ROW_3)
         {
             if ((getPiece({ROW_4, col - 1}) == Piece::BPawn || getPiece({ROW_4, col + 1}) == Piece::BPawn) &&
                 getPiece({ROW_5, col}) == Piece::WPawn &&
@@ -283,4 +244,68 @@ void Board::checkAndModifyEnPassantRule()
             enPassantSquare.setInvalid();
         }
     }
+}
+
+/*
+ *   Throw runtime error "Invalid move"
+ */
+void Board::makeMove(Move move)
+{
+    MoveType moveType = move.type();
+
+    if (!move.isValid())
+    {
+        throw std::runtime_error("Invalid move");
+    }
+
+    if (moveType == MoveType::NORMAL)
+    {
+    }
+    else if (moveType == MoveType::CASTLING)
+    {
+        makeCastle(move);
+    }
+    else if (moveType == MoveType::EN_PASSANT)
+    {
+    }
+    else if (moveType == MoveType::PROMOTION)
+    {
+    }
+}
+
+void Board::makeCastle(Move move)
+{
+    /*
+     * squareTo() should be the king origin and squareFrom() is the king end square
+     */
+
+    deletePiece(move.squareFrom());
+
+    if (move.squareTo() == SQ_G1)
+    {
+        putPiece(Piece::WKing, SQ_G1);
+        deletePiece(SQ_H1);
+        putPiece(Piece::WRook, SQ_F1);
+    }
+    else if (move.squareTo() == SQ_C1)
+    {
+        putPiece(Piece::WKing, SQ_C1);
+        deletePiece(SQ_A1);
+        putPiece(Piece::WRook, SQ_D1);
+    }
+    else if (move.squareTo() == SQ_G8)
+    {
+        putPiece(Piece::BKing, SQ_G8);
+        deletePiece(SQ_H8);
+        putPiece(Piece::BRook, SQ_F8);
+    }
+    else if (move.squareTo() == SQ_C8)
+    {
+        putPiece(Piece::BKing, SQ_C8);
+        deletePiece(SQ_A8);
+        putPiece(Piece::BRook, SQ_D8);
+    }
+}
+void Board::makeEnPassant(Move move)
+{
 }

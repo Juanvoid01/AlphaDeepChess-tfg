@@ -10,6 +10,7 @@
 #include <sstream>
 
 constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+constexpr auto EnPassantFEN = "rnbqkb1r/2pp2pn/1p6/pP1PppPp/8/2N5/P1P1PP1P/R1BQKBNR w KQkq f6 0 8";
 
 void Uci::loop()
 {
@@ -19,7 +20,7 @@ void Uci::loop()
     bool exit = false;
 
     board.loadFen(StartFEN);
-    
+
     do
     {
         std::getline(std::cin, line);

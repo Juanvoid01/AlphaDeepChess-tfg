@@ -1,14 +1,12 @@
 #pragma once
 
-#include <string>
-
-#include "types.hpp"
+#include "move.hpp"
 
 class Board
 {
 
 public:
-    Board() {}
+    Board() { clearPosition(); }
     ~Board() {}
 
     std::string toString() const;
@@ -17,26 +15,32 @@ public:
     std::string fen() const;
 
     bool empty(Square square) const;
+    void makeMove(Move move);
 
 private:
-    // bitboards
+    // board with the pieces
+    Piece boardPieces[64];
 
-    uint64_t BPawns;
-    uint64_t BKnights;
-    uint64_t BBishops;
-    uint64_t BRooks;
-    uint64_t BQueens;
-    uint64_t BKing;
-    uint64_t WPawns;
-    uint64_t WKnights;
-    uint64_t WBishops;
-    uint64_t WRooks;
-    uint64_t WQueens;
-    uint64_t WKing;
+    /*
+        index of each bitboard
 
-    uint64_t Black;
-    uint64_t White;
-    uint64_t AllPieces;
+        WPawn = 0
+        WKnight = 1
+        WBishop = 2
+        WRook = 3
+        WQueen = 4
+        WKing = 5
+        BPawn = 6
+        BKnight = 7
+        BBishop = 8
+        BRook = 9
+        BQueen = 10
+        BKing = 11
+    */
+    uint64_t bitBoards[11];
+
+    uint64_t BlackBB; // bitboard for black pieces
+    uint64_t WhiteBB; // bitboard for white pieces
 
     // Game state
 
@@ -54,18 +58,28 @@ private:
     char squareToChar(Square square) const;
     void putPiece(Piece piece, Square square);
     void deletePiece(Square square);
-    uint64_t &pieceBitboard(Piece piece);
-    void clearPieces();
+    void clearPosition();
     void checkAndModifyCastleRights();
     void checkAndModifyEnPassantRule();
+
+    void makeCastle(Move move);
+    void makeEnPassant(Move move);
 };
+
+/*
+ *   Returns the piece in the square, if square should be valid
+ */
+inline Piece Board::getPiece(Square square) const
+{
+    return boardPieces[square];
+}
 
 /*
  *   Returns the color of the piece, if the square is empty the color is undefined
  */
 inline Color Board::getPieceColor(Square square) const
 {
-    if (White & square.mask())
+    if (WhiteBB & square.mask())
     {
         return Color::WHITE;
     }
@@ -84,94 +98,68 @@ inline char Board::squareToChar(Square square) const
 }
 
 /*
- *   Input should be 0 <= row < 8 && 0 <= col < 8;
+ *   Input should be a valid square;
  *   Return true if the square is empty;
  */
 inline bool Board::empty(Square square) const
 {
-    return (AllPieces & square.mask()) == 0;
+    return boardPieces[square] == Piece::Empty;
 }
 
 /*
- *   Input should be 0 <= row < 8 && 0 <= col < 8 && piece != Empty;
+ *   Input should be a valid square && piece != Empty;
  */
 inline void Board::putPiece(Piece piece, Square square)
 {
 
     uint64_t mask = square.mask();
+    int newPieceIndex = index(piece);
 
-    if (empty(square))
-    {
-        pieceBitboard(piece) |= mask;
-    }
-    else
+    if (!empty(square))
     {
         // first delete the actual piece
-        pieceBitboard(getPiece(square)) &= ~mask;
-        White &= ~mask;
-        Black &= ~mask;
-
-        pieceBitboard(piece) |= mask;
+        bitBoards[index(getPiece(square))] &= ~mask;
+        WhiteBB &= ~mask;
+        BlackBB &= ~mask;
     }
+
+    bitBoards[newPieceIndex] |= mask;
+    boardPieces[square] = piece;
 
     if (color(piece) == Color::WHITE)
     {
-        White |= mask;
+        WhiteBB |= mask;
     }
     else
     {
-        Black |= mask;
+        BlackBB |= mask;
     }
-
-    AllPieces |= mask;
 }
 
 /*
- *   Input should be 0 <= row < 8 && 0 <= col < 8 && piece != Empty;
+ *   Input should be a valid square && piece != Empty;
  */
 inline void Board::deletePiece(Square square)
 {
-
     uint64_t mask = square.mask();
-    pieceBitboard(getPiece(square)) &= ~mask;
-    White &= ~mask;
-    Black &= ~mask;
-    AllPieces &= ~mask;
-}
-
-/*
- *   Returns reference to the bitboard of the piece
- *   Piece should not be Empty
- */
-inline uint64_t &Board::pieceBitboard(Piece piece)
-{
-
-    static uint64_t *pieceBitboards[12] = {
-        &WPawns, &WKnights, &WBishops, &WRooks, &WQueens, &WKing,
-        &BPawns, &BKnights, &BBishops, &BRooks, &BQueens, &BKing};
-
-    return *pieceBitboards[static_cast<int>(piece)];
+    bitBoards[index(getPiece(square))] &= ~mask;
+    WhiteBB &= ~mask;
+    BlackBB &= ~mask;
+    boardPieces[square] = Piece::Empty;
 }
 
 /*
  *   Remove all pieces on the board
  *   Do not modify the game state, just put all bitboards = 0
  */
-inline void Board::clearPieces()
+inline void Board::clearPosition()
 {
-    BPawns = 0;
-    BKnights = 0;
-    BBishops = 0;
-    BRooks = 0;
-    BQueens = 0;
-    BKing = 0;
-    WPawns = 0;
-    WKnights = 0;
-    WBishops = 0;
-    WRooks = 0;
-    WQueens = 0;
-    WKing = 0;
-    Black = 0;
-    White = 0;
-    AllPieces = 0;
+    BlackBB = 0;
+    WhiteBB = 0;
+
+    for (int i = 0; i < 12; i++)
+        bitBoards[i] = 0;
+
+    for (int i = 0; i < 64; i++)
+        boardPieces[i] = Piece::Empty;
 }
