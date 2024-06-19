@@ -6,7 +6,7 @@
 */
 
 #include <board.hpp>
-
+#include <moveGenerator.hpp>
 
 
 class Uci
@@ -21,6 +21,7 @@ public:
 private:
 
     Board board;
+    MoveList moves;
     
     void uciCommandAction();
     void isReadyCommandAction();

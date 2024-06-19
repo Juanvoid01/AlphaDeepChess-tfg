@@ -11,7 +11,7 @@
 
 constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 constexpr auto EnPassantFEN = "rnbqkb1r/2pp2pn/1p6/pP1PppPp/8/2N5/P1P1PP1P/R1BQKBNR w KQkq f6 0 8";
-constexpr auto PromotionFEN = "r1b1kb1r/p1pqn1P1/1pn4p/8/2P5/2N5/PPQBN1pP/R3KB1R w KQkq - 0 12";
+constexpr auto PromotionFEN = "r3kb1r/pbpqn1P1/1pn4p/5Q2/2P5/2N5/PP1BN1pP/R3KB1R w KQkq - 2 13";
 
 void Uci::loop()
 {
@@ -21,8 +21,7 @@ void Uci::loop()
     bool exit = false;
 
     board.loadFen(PromotionFEN);
-    board.makeMove(Move(SQ_G7, SQ_F8, MoveType::PROMOTION, PieceType::QUEEN));
-    board.makeMove(Move(SQ_G2, SQ_H1, MoveType::PROMOTION, PieceType::QUEEN));
+
     do
     {
         std::getline(std::cin, line);
@@ -148,6 +147,11 @@ void Uci::positionCommandAction()
 void Uci::diagramCommandAction()
 {
     std::cout << board.toString() << std::endl;
+
+    generateLegalMoves(moves, board);
+
+    std::cout << "Legal moves : " << moves.size() << std::endl
+              << moves.toString() << std::endl;
 }
 
 void Uci::helpCommandAction()

@@ -17,7 +17,6 @@ public:
     bool empty(Square square) const;
     void makeMove(Move move);
 
-private:
     // board with the pieces
     Piece boardPieces[64];
 
@@ -42,6 +41,9 @@ private:
     uint64_t BlackBB; // bitboard for black pieces
     uint64_t WhiteBB; // bitboard for white pieces
 
+    uint64_t pinMask;
+    uint64_t checkMask;
+
     // Game state
 
     Color sideToMove;
@@ -54,6 +56,7 @@ private:
     int moveNumber;
 
     Piece getPiece(Square square) const;
+    PieceType getPieceType(Square square) const;
     Color getPieceColor(Square square) const;
     char squareToChar(Square square) const;
     void putPiece(Piece piece, Square square);
@@ -72,6 +75,11 @@ private:
 inline Piece Board::getPiece(Square square) const
 {
     return boardPieces[square];
+}
+
+inline PieceType Board::getPieceType(Square square) const
+{
+    return pieceToPieceType(boardPieces[square]);
 }
 
 /*

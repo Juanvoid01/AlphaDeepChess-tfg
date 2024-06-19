@@ -32,6 +32,8 @@ enum Column : uint8_t
     COL_H
 };
 
+// Returns true if the row and col are between 0 and 7
+constexpr inline bool validCoord(int row, int col) { return row >= ROW_1 && row <= ROW_8 && col >= COL_A && col <= COL_H; }
 /*
     Increments to move on the board from white perspective
     E.g the square x on top of the square y has the same value + 8 units
@@ -129,10 +131,17 @@ enum class Color
     BLACK = 1
 };
 
+constexpr inline PieceType pieceToPieceType(Piece piece)
+{
+    // the white and black pieces have a difference of +6 int value
+    // E.g  WKnight = 1, BKnight = 7
+    return static_cast<PieceType>(static_cast<int>(piece) - (static_cast<int>(piece) < 6 ? 0 : 6));
+}
+
 constexpr inline Piece createPieceByTypeAndColor(PieceType type, Color color)
 {
     // the white and black pieces have a difference of +6 int value
-    // E.g  WKnight = 1, BKnight = 7,
+    // E.g  WKnight = 1, BKnight = 7
     return static_cast<Piece>(static_cast<int>(type) + (6 * static_cast<int>(color)));
 }
 

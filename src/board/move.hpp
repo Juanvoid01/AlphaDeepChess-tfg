@@ -3,6 +3,12 @@
 #include "types.hpp"
 #include "square.hpp"
 
+/*
+ *   max number of moves found in a chess position is 218
+ *   https://www.chessprogramming.org/Encoding_Moves#MoveIndex
+ */
+#define MAX_MOVES 256
+
 enum class MoveType
 {
     NORMAL = 0,
@@ -100,6 +106,51 @@ public:
     constexpr bool operator==(const Move &m) const { return data == m.data; }
     constexpr bool operator!=(const Move &m) const { return data != m.data; }
 
+    /*
+     *   Return string representation. E.g : e2e4
+     */
+    inline std::string toString() const
+    {
+        return squareFrom().toString() + squareTo().toString();
+    }
+
 private:
     std::uint16_t data;
+};
+
+class MoveList
+{
+public:
+    MoveList() : nMoves(0) {}
+
+    // store a move in the list
+    constexpr inline void add(Move move) { moves[nMoves++] = move; }
+
+    // empty the list
+    constexpr inline void clear() { nMoves = 0; }
+
+    // return the number of moves stored
+    constexpr inline int size() const { return nMoves; }
+
+    // return the move in the pos index, index should be valid ( 0 <= index< nMoves)
+    constexpr inline Move get(int index) const { return moves[index]; }
+
+    /*
+     *   Return string representation of all moves in the list E.g :
+     *   e2e4:
+     *   b1b2:
+     */
+    inline std::string toString() const
+    {
+        std::string s = "";
+        for (int i = 0; i < nMoves; i++)
+        {
+            s += moves[i].toString() + ":\n";
+        }
+        return s;
+    }
+
+private:
+    Move moves[MAX_MOVES];
+    int nMoves;
 };
