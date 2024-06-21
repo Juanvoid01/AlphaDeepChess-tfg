@@ -38,8 +38,9 @@ public:
     */
     uint64_t bitBoards[11];
 
-    uint64_t BlackBB; // bitboard for black pieces
-    uint64_t WhiteBB; // bitboard for white pieces
+    uint64_t BlackBB;     // bitboard for black pieces
+    uint64_t WhiteBB;     // bitboard for white pieces
+    uint64_t AllPiecesBB; // bitboard for all pieces
 
     uint64_t pinMask;
     uint64_t checkMask;
@@ -61,6 +62,9 @@ public:
     char squareToChar(Square square) const;
     void putPiece(Piece piece, Square square);
     void deletePiece(Square square);
+    uint64_t friendlyBB(Color color) const;
+    uint64_t enemyBB(Color color) const;
+    uint64_t enemyOrEmptyBB(Color color) const;
     void clearPosition();
     void checkAndModifyCastleRights();
     void checkAndModifyEnPassantRule();
@@ -142,6 +146,8 @@ inline void Board::putPiece(Piece piece, Square square)
     {
         BlackBB |= mask;
     }
+
+    AllPiecesBB = WhiteBB | BlackBB;
 }
 
 /*
@@ -154,6 +160,7 @@ inline void Board::deletePiece(Square square)
     WhiteBB &= ~mask;
     BlackBB &= ~mask;
     boardPieces[square] = Piece::Empty;
+    AllPiecesBB = WhiteBB | BlackBB;
 }
 
 /*
@@ -164,10 +171,35 @@ inline void Board::clearPosition()
 {
     BlackBB = 0;
     WhiteBB = 0;
+    AllPiecesBB = 0;
 
     for (int i = 0; i < 12; i++)
         bitBoards[i] = 0;
 
     for (int i = 0; i < 64; i++)
         boardPieces[i] = Piece::Empty;
+}
+
+/*
+ * Return the bitboard of all the squares with a friendly piece
+ */
+inline uint64_t Board::friendlyBB(Color color) const
+{
+    return color == Color::BLACK ? BlackBB : WhiteBB;
+}
+
+/*
+ * Return the bitboard of all the squares with an enemy piece
+ */
+inline uint64_t Board::enemyBB(Color color) const
+{
+    return color == Color::WHITE ? BlackBB : WhiteBB;
+}
+
+/*
+ * Return the bitboard of all the squares empty or with an enemy piece
+ */
+inline uint64_t Board::enemyOrEmptyBB(Color color) const
+{
+    return (~AllPiecesBB) | (color == Color::WHITE ? BlackBB : WhiteBB);
 }

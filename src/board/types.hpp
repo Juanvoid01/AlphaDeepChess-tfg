@@ -156,6 +156,15 @@ constexpr inline char pieceToChar(Piece piece)
     return pieceRepresentation[static_cast<int>(piece)];
 }
 
+/*
+ *   Returns char piece representation
+ *   {'n', 'b', 'r', 'q', 'k', ' '}
+ */
+constexpr inline char pieceTypeToChar(PieceType pieceType)
+{
+    return pieceRepresentation[static_cast<int>(pieceType) + 6];
+}
+
 // Returns the piece that corresponds to the character
 constexpr inline Piece charToPiece(char pieceChar)
 {

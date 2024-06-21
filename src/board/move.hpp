@@ -111,7 +111,14 @@ public:
      */
     inline std::string toString() const
     {
-        return squareFrom().toString() + squareTo().toString();
+        if (type() != MoveType::PROMOTION)
+        {
+            return squareFrom().toString() + squareTo().toString();
+        }
+        else
+        {
+            return squareFrom().toString() + squareTo().toString() + pieceTypeToChar(promotionPiece());
+        }
     }
 
 private:

@@ -12,6 +12,7 @@
 constexpr auto StartFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 constexpr auto EnPassantFEN = "rnbqkb1r/2pp2pn/1p6/pP1PppPp/8/2N5/P1P1PP1P/R1BQKBNR w KQkq f6 0 8";
 constexpr auto PromotionFEN = "r3kb1r/pbpqn1P1/1pn4p/5Q2/2P5/2N5/PP1BN1pP/R3KB1R w KQkq - 2 13";
+constexpr auto KiwipeteFEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 
 void Uci::loop()
 {
@@ -20,7 +21,7 @@ void Uci::loop()
 
     bool exit = false;
 
-    board.loadFen(PromotionFEN);
+    board.loadFen(KiwipeteFEN);
 
     do
     {
@@ -70,7 +71,7 @@ void Uci::loop()
         {
             helpCommandAction();
         }
-        else if (command == "quit")
+        else if (command == "q" || command == "quit")
         {
             quitCommandAction();
             exit = true;

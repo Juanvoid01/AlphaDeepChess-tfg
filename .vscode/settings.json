@@ -57,6 +57,7 @@
         "cstring": "cpp",
         "iomanip": "cpp",
         "bitset": "cpp",
-        "condition_variable": "cpp"
+        "condition_variable": "cpp",
+        "typeindex": "cpp"
     }
 }
